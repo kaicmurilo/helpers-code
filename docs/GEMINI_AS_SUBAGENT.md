@@ -101,12 +101,23 @@ ask-gemini com model="gemini-2.5-flash": resuma o arquivo @src/index.ts
 - Análise de logs
 - Perguntas factuais sobre código
 - Explicações simples de funções
-- Buscas em arquivos que não precisam de contexto da conversa
+- Qualquer tarefa que não dependa do fio da conversa atual
+
+## Contexto compartilhado via claude-mem
+
+Se tanto o Claude Code quanto o Gemini CLI estiverem usando o [claude-mem](https://github.com/thedotmack/claude-mem) com o **mesmo repositório de memória** (`~/.claude-mem`), o Gemini tem acesso a toda a memória persistente de sessões anteriores — projetos, decisões, histórico de trabalho — via os hooks configurados em `~/.gemini/settings.json`.
+
+Isso significa que a limitação de contexto é muito menor do que parece: o Gemini já sabe o que aconteceu em sessões passadas. O único contexto que ele não tem é o da **conversa atual** (o que foi dito nesta sessão específica).
+
+Para incluir contexto da conversa atual ao delegar, basta passar as informações relevantes no prompt:
+
+```
+ask-gemini: "Estamos migrando o auth middleware por requisito de compliance (contexto da sessão atual). Analise o arquivo @src/auth/middleware.ts e liste os pontos que precisam mudar."
+```
 
 ## Limitações
 
-- O Gemini não tem acesso ao histórico da conversa com o Claude
-- Para tarefas que dependem de contexto acumulado, o Claude deve responder diretamente
+- Não tem acesso ao fio da conversa atual — passe contexto relevante no prompt quando necessário
 - Requer autenticação ativa do Gemini CLI (`~/.gemini/oauth_creds.json`)
 
 ## Referências
