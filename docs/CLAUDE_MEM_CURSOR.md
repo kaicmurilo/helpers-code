@@ -95,23 +95,9 @@ Após cada sessão, o hook `stop` gera um resumo e atualiza o arquivo:
 
 Esse arquivo é automaticamente incluído por todos os chats do Cursor (via Rules), eliminando a necessidade de reexplicar o contexto do projeto.
 
-## Verificação
-
-```bash
-# Worker respondendo?
-curl http://127.0.0.1:37777/api/readiness
-# → {"status":"ready","mcpReady":true}
-
-# Status dos hooks
-cd /tmp/claude-mem-full && ~/.bun/bin/bun plugin/scripts/worker-service.cjs cursor status
-
-# Web viewer com histórico de sessões
-open http://localhost:37777
-```
-
 ## MCP Tools no Cursor
 
-Para ter as ferramentas de busca de memória disponíveis no Cursor, adicionar em `~/.cursor/mcp.json`:
+Adicionar em `~/.cursor/mcp.json` para ter as ferramentas de busca de memória no agente:
 
 ```json
 {
@@ -130,6 +116,19 @@ Ferramentas disponíveis:
 - `search(query)` — busca observações relevantes do passado
 - `timeline(id)` — contexto cronológico em torno de uma entrada
 - `get_observations([ids])` — detalhes completos por IDs
+
+Reiniciar o Cursor após adicionar para carregar o servidor MCP.
+
+## Verificação
+
+```bash
+# Worker respondendo?
+curl http://127.0.0.1:37777/api/readiness
+# → {"status":"ready","mcpReady":true}
+
+# Web viewer com histórico de sessões
+open http://localhost:37777
+```
 
 ## Troubleshooting
 
