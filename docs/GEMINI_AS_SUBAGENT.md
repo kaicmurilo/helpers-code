@@ -2,14 +2,18 @@
 
 Use o Gemini CLI rodando localmente como subagente dentro do Claude Code para delegar tarefas simples e economizar tokens do Claude.
 
+Combinado com o [claude-mem](https://github.com/thedotmack/claude-mem), o Gemini compartilha a mesma memória persistente do Claude Code — projetos, decisões e histórico de trabalho ficam disponíveis para ambos automaticamente.
+
 ## Como funciona
 
 ```
 Claude Code (você fala)
-     ↓ delega tarefas simples
+     ↓ delega tarefas simples via MCP
 Gemini CLI (roda na sua máquina)
-     ↓ responde
-Claude Code (integra a resposta)
+     ↑↓ lê/escreve memória compartilhada
+  claude-mem (~/.claude-mem)
+     ↑↓ lê/escreve memória compartilhada
+Claude Code
 ```
 
 O pacote `gemini-mcp-tool` expõe o Gemini CLI local como um servidor MCP (Model Context Protocol), permitindo que o Claude Code chame o Gemini diretamente como ferramenta.
@@ -19,6 +23,7 @@ O pacote `gemini-mcp-tool` expõe o Gemini CLI local como um servidor MCP (Model
 - [Claude Code](https://claude.ai/code) instalado
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli) instalado e autenticado
 - Node.js (para o `npx`)
+- (Recomendado) [claude-mem](https://github.com/thedotmack/claude-mem) instalado em ambos os IDEs
 
 ### Instalar o Gemini CLI
 
@@ -105,14 +110,49 @@ ask-gemini com model="gemini-2.5-flash": resuma o arquivo @src/index.ts
 
 ## Contexto compartilhado via claude-mem
 
-Se tanto o Claude Code quanto o Gemini CLI estiverem usando o [claude-mem](https://github.com/thedotmack/claude-mem) com o **mesmo repositório de memória** (`~/.claude-mem`), o Gemini tem acesso a toda a memória persistente de sessões anteriores — projetos, decisões, histórico de trabalho — via os hooks configurados em `~/.gemini/settings.json`.
+O [claude-mem](https://github.com/thedotmack/claude-mem) é um plugin de memória persistente para Claude Code e Gemini CLI que armazena observações de cada sessão em um banco local (`~/.claude-mem`).
 
-Isso significa que a limitação de contexto é muito menor do que parece: o Gemini já sabe o que aconteceu em sessões passadas. O único contexto que ele não tem é o da **conversa atual** (o que foi dito nesta sessão específica).
+Quando instalado em ambos os IDEs apontando para o **mesmo diretório**, Claude Code e Gemini CLI passam a compartilhar automaticamente:
+- Histórico de trabalho de sessões anteriores
+- Decisões de arquitetura e contexto de projetos
+- Bugs, soluções e aprendizados acumulados
 
-Para incluir contexto da conversa atual ao delegar, basta passar as informações relevantes no prompt:
+### Instalar o claude-mem no Claude Code
+
+Adicione em `~/.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    }
+  }
+}
+```
+
+### Instalar o claude-mem no Gemini CLI
+
+```bash
+gemini  # abra o Gemini CLI
+/install-extension thedotmack/claude-mem
+```
+
+O Gemini CLI adiciona automaticamente os hooks em `~/.gemini/settings.json` para ler e escrever no mesmo `~/.claude-mem`.
+
+### Resultado
+
+O Gemini já sabe o que aconteceu em sessões passadas. O único contexto que ele **não** tem é o fio da **conversa atual** — e isso é fácil de contornar passando as informações relevantes no prompt:
 
 ```
-ask-gemini: "Estamos migrando o auth middleware por requisito de compliance (contexto da sessão atual). Analise o arquivo @src/auth/middleware.ts e liste os pontos que precisam mudar."
+ask-gemini: "Estamos migrando o auth middleware por requisito de compliance.
+Analise @src/auth/middleware.ts e liste os pontos que precisam mudar."
 ```
 
 ## Limitações
@@ -124,5 +164,6 @@ ask-gemini: "Estamos migrando o auth middleware por requisito de compliance (con
 
 - [gemini-mcp-tool no npm](https://www.npmjs.com/package/gemini-mcp-tool)
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+- [claude-mem](https://github.com/thedotmack/claude-mem) — memória persistente compartilhada entre IDEs
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp)
