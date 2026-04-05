@@ -4,3 +4,4 @@ Repositório de utilitários e guias para desenvolvimento local com Claude Code,
 
 ## Conteúdo
 - [Tutorial OpenClaude + oMLX](docs/OPENCLAUDE_OMLX.md): Guia passo a passo para instalação e configuração local.
+- [Gemini CLI como Subagente no Claude Code](docs/GEMINI_AS_SUBAGENT.md): Use o Gemini CLI localmente como subagente para delegar tarefas simples e economizar tokens.
